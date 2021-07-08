@@ -55,7 +55,12 @@ app.get('/api/candidates', (req, res) => {
 });
 // Get a single candidate
 app.get('/api/candidate/:id', (req, res) => {
-  const sql = `SELECT * FROM candidates WHERE id = ?`;
+  const sql = `SELECT candidates.*, parties.name 
+             AS party_name 
+             FROM candidates 
+             LEFT JOIN parties 
+             ON candidates.party_id = parties.id 
+             WHERE candidates.id = ?`;
   const params = [req.params.id];
 
   db.query(sql, params, (err, row) => {
@@ -69,17 +74,58 @@ app.get('/api/candidate/:id', (req, res) => {
     });
   });
 });
+app.get('api/parties', (req, res) => {
+  const sql = `select * from parties`;
+  db.query(sql, (err, rows) => {
+    console.log('id', params);
+    if (err) {
+      res.status(500).json({ error: err.message });
+    }
+    res.json({
+      message: 'success',
+      data: rows,
+    });
+  });
+});
+
+app.get('api/party/:id', (req, res) => {
+  const sql = `SELECT * FROM parties WHERE id = ?`;
+});
+
 // Delete a candidate
 app.delete('/api/candidate/:id', (req, res) => {
   const sql = `DELETE FROM candidates WHERE id = ?`;
   const params = [req.params.id];
-
+  console.log('id', params);
   db.query(sql, params, (err, result) => {
+    console.log('result', result);
+
     if (err) {
       res.statusMessage(400).json({ error: res.message });
     } else if (!result.affectedRows) {
       res.json({
         message: 'Candidate not found',
+      });
+    } else {
+      console.log('result', result);
+      res.json({
+        message: 'deleted',
+        changes: result.affectedRows,
+        id: req.params.id,
+      });
+    }
+  });
+});
+app.delete('/api/party/:id', (req, res) => {
+  const sql = `DELETE FROM parties WHERE id = ?`;
+  const params = [req.params.id];
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: res.message });
+      // checks if anything was deleted
+    } else if (!result.affectedRows) {
+      res.json({
+        message: 'Party not found',
       });
     } else {
       res.json({
