@@ -29,11 +29,13 @@ router.post('/api/candidate', ({ body }, res) => {
   });
 });
 // Update a candidate's party
-router.put('/candidate/:id', (req, res) => {
+router.put('/candidate/:id', ({ body, params }, res) => {
   const sql = `UPDATE candidates SET party_id = ? 
                  WHERE id = ?`;
-  const params = [req.body.party_id, req.params.id];
+  const params1 = [body.party_id, params.id];
   // const errors = inputCheck(req.body, 'party_id');
+  //
+  console.log(params1);
 
   // if (errors) {
   //   res.status(400).json({ error: errors });
